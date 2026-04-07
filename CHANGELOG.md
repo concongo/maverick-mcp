@@ -8,6 +8,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.3] - 2026-04-07
+
+### Changed
+
+- `docker-compose.yml` — added `PERPLEXITY_API_KEY` as an optional environment variable (passes through from `.env`)
+
+---
+
 ## [0.2.2] - 2026-04-07
 
 ### Changed
