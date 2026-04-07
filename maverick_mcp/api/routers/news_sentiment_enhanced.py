@@ -10,6 +10,7 @@ This module provides reliable news sentiment analysis by:
 import asyncio
 import logging
 import os
+import re
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
@@ -21,6 +22,66 @@ from maverick_mcp.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
+
+_PERPLEXITY_NEWS_DOMAINS = [
+    "reuters.com",
+    "bloomberg.com",
+    "wsj.com",
+    "cnbc.com",
+    "marketwatch.com",
+    "finance.yahoo.com",
+    "thestreet.com",
+    "fool.com",
+    "seekingalpha.com",
+]
+
+_PERPLEXITY_BROAD_NEWS_DOMAINS = [
+    *_PERPLEXITY_NEWS_DOMAINS,
+    "investing.com",
+]
+
+_NON_NEWS_PAGE_PATTERNS = [
+    r"\bsummary\b",
+    r"\bquote\b",
+    r"\bprofile\b",
+    r"\bchart\b",
+    r"\blive\b",
+    r"\bstock price\b",
+    r"\bmarkets?\b",
+    r"\bprice today\b",
+    r"\bmarkets data\b",
+    r"/quote\b",
+    r"/symbol\b",
+    r"/stocks?\b",
+]
+
+_NEWS_POSITIVE_PATTERNS = [
+    r"\bnews\b",
+    r"\barticle\b",
+    r"\breport\b",
+    r"\bcoverage\b",
+    r"\bearnings\b",
+    r"\banalyst\b",
+    r"\blaunch\b",
+    r"\bupgrade\b",
+    r"\bdowngrade\b",
+    r"/news/",
+    r"/news\b",
+]
+
+_NEWS_HUB_PATTERNS = [
+    r"\bnews \([A-Z]+\)\b",
+    r"\bstock news\b",
+    r"\bshare news\b",
+    r"/news$",
+]
+
+_ARTICLE_URL_PATTERNS = [
+    r"/\d{4}/\d{2}/\d{2}/",
+    r"/article/",
+    r"/articles/",
+    r"/news/",
+]
 
 
 def get_tiingo_client() -> TiingoClient | None:
@@ -314,12 +375,43 @@ async def _get_perplexity_news_sentiment(
             f"Using Perplexity fallback search for {ticker}",
         )
 
-        provider = PerplexitySearchProvider(perplexity_api_key)
-        query = f"{ticker} stock news sentiment recent {timeframe}"
-        results = await asyncio.wait_for(
-            provider.search(query=query, num_results=limit, timeout_budget=8.0),
-            timeout=8.0,
-        )
+        queries = [
+            f"{ticker} stock latest news last {timeframe}",
+            f"{ticker} earnings product launch analyst rating news last {timeframe}",
+        ]
+        results: list[dict[str, Any]] = []
+        seen_urls: set[str] = set()
+        domain_strategies = [
+            ("perplexity_article_domains", _PERPLEXITY_NEWS_DOMAINS),
+            ("perplexity_broad_domains", _PERPLEXITY_BROAD_NEWS_DOMAINS),
+        ]
+
+        for step_name, domain_filter in domain_strategies:
+            provider = PerplexitySearchProvider(
+                perplexity_api_key,
+                search_domain_filter=domain_filter,
+            )
+            tool_logger.step(
+                step_name,
+                f"Searching {len(domain_filter)} preferred domains for {ticker}",
+            )
+            for query in queries:
+                raw_results = await asyncio.wait_for(
+                    provider.search(query=query, num_results=limit, timeout_budget=8.0),
+                    timeout=8.0,
+                )
+                filtered_results = _filter_news_like_results(raw_results)
+                for result in filtered_results:
+                    url = result.get("url", "")
+                    if url and url not in seen_urls:
+                        seen_urls.add(url)
+                        results.append(result)
+                    if len(results) >= limit:
+                        break
+                if len(results) >= limit:
+                    break
+            if len(results) >= min(4, limit):
+                break
 
         if not results:
             tool_logger.step(
@@ -358,6 +450,61 @@ async def _get_perplexity_news_sentiment(
     except Exception as exc:
         tool_logger.step("perplexity_error", f"Perplexity fallback error: {exc}")
         return None
+
+
+def _filter_news_like_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Filter Perplexity search results down to likely news articles."""
+
+    scored_results: list[tuple[int, dict[str, Any]]] = []
+    for result in results:
+        title = str(result.get("title", ""))
+        url = str(result.get("url", ""))
+        domain = str(result.get("domain", ""))
+        content = str(result.get("content", ""))
+        combined = f"{title} {url}".lower()
+
+        if any(re.search(pattern, combined) for pattern in _NON_NEWS_PAGE_PATTERNS):
+            continue
+
+        if len(content.strip()) < 40:
+            continue
+
+        positive_score = sum(
+            1 for pattern in _NEWS_POSITIVE_PATTERNS if re.search(pattern, combined)
+        )
+
+        if positive_score == 0:
+            # Allow explicit news domains only when the snippet itself looks like article text.
+            snippet_words = len(content.strip().split())
+            if snippet_words < 12:
+                continue
+
+        article_score = 0
+        if any(re.search(pattern, url.lower()) for pattern in _ARTICLE_URL_PATTERNS):
+            article_score += 3
+        if re.search(r"\b(news|article|report)\b", title.lower()):
+            article_score += 2
+        if any(re.search(pattern, title) for pattern in _NEWS_HUB_PATTERNS):
+            article_score -= 2
+        if domain.endswith("investing.com") and "news" not in url.lower():
+            article_score -= 2
+
+        scored_results.append((positive_score + article_score, result))
+
+    scored_results.sort(key=lambda item: item[0], reverse=True)
+
+    filtered_results: list[dict[str, Any]] = []
+    domain_counts: dict[str, int] = {}
+    for score, result in scored_results:
+        if score < 1:
+            continue
+        domain = str(result.get("domain", ""))
+        if domain_counts.get(domain, 0) >= 2:
+            continue
+        filtered_results.append(result)
+        domain_counts[domain] = domain_counts.get(domain, 0) + 1
+
+    return filtered_results
 
 
 def _basic_news_analysis(news_articles: list) -> dict[str, Any]:
