@@ -165,7 +165,7 @@ class HealthChecker:
         try:
             from sqlalchemy import text
 
-            from maverick_mcp.data.database import get_db_session
+            from maverick_mcp.data.session_management import get_db_session
 
             with get_db_session() as session:
                 # Simple query to test database connectivity
