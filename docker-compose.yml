@@ -5,7 +5,7 @@ services:
     ports:
       - "8003:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/maverick_mcp
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/maverick_mcp}
       - REDIS_HOST=redis
       # Required API Keys
       - TIINGO_API_KEY=${TIINGO_API_KEY}

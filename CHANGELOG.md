@@ -8,6 +8,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.2] - 2026-04-07
+
+### Changed
+
+- `docker-compose.yml` — `DATABASE_URL` now reads from `.env` with fallback to the internal PostgreSQL container (`postgresql://postgres:postgres@postgres:5432/maverick_mcp`)
+
+---
+
 ## [0.2.1] - 2026-04-07
 
 ### Added
