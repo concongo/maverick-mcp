@@ -2047,4 +2047,3 @@ Expected: All tool groups show "registered successfully", no failures
 git add -A
 git commit -m "feat: complete Maverick MCP roadmap v1 — 5 domains, ~28 new tools, service-layer architecture"
 ```
-

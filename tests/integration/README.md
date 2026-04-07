@@ -49,7 +49,7 @@ uv run python tests/integration/test_orchestration_complete.py
 
 ### Orchestrated Analysis (4 tests)
 - Conservative LLM-powered routing
-- Aggressive rule-based routing  
+- Aggressive rule-based routing
 - Moderate hybrid routing
 - Day trader fast execution
 

@@ -17,4 +17,3 @@
 
 - [Back to Tracks](../../tracks.md)
 - [Product Context](../../product.md)
-

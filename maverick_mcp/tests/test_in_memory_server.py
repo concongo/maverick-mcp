@@ -59,7 +59,7 @@ def _serialize_health(obj: Any) -> str:
             return {k: _convert(v) for k, v in o._asdict().items()}
         if isinstance(o, dict):
             return {k: _convert(v) for k, v in o.items()}
-        if isinstance(o, (list, tuple)):
+        if isinstance(o, list | tuple):
             return [_convert(i) for i in o]
         if isinstance(o, Mock):
             return str(o)

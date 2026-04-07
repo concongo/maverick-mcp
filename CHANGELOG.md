@@ -8,6 +8,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.1] - 2026-04-07
+
+### Added
+
+- **Pre-commit configuration** (`.pre-commit-config.yaml`) — enforces code quality on every commit
+  - `pre-commit-hooks`: trailing whitespace, end-of-file fixer, YAML/TOML validation, large file guard, merge conflict detection, debug statement check
+  - `ruff` (v0.11.10): linting with auto-fix and formatting via `ruff-pre-commit`
+  - Run via `uvx pre-commit run --all-files` (system pre-commit uses Python 3.9 and is incompatible)
+
+### Fixed
+
+- Applied pre-commit auto-fixes: trailing whitespace and missing EOF newlines across 50+ files
+- `UP038` (ruff): modernized `isinstance(x, (A, B))` → `isinstance(x, A | B)` in `tool_registry.py`, `test_in_memory_server.py`, and `test_full_backtest_workflow.py`
+- `F841` (ruff): removed unused variable assignments in `test_journal_service.py`, `test_risk_service.py`, `test_screening_pipeline.py`
+- `I001` (ruff): fixed unsorted import block in `database_self_contained.py`
+
+---
+
 ## [0.2.0] - 2026-04-07
 
 ### Added

@@ -782,7 +782,7 @@ For issues or questions:
 ### Performance Improvements
 
 - **Parallel Agent Execution**: Increased concurrent agents from 4 to 6
-- **Optimized Semaphores**: BoundedSemaphore for better resource management  
+- **Optimized Semaphores**: BoundedSemaphore for better resource management
 - **Reduced Rate Limiting**: Delays decreased from 0.5s to 0.05s
 - **Batch Processing**: Improved throughput for multiple research tasks
 - **Smart Caching**: Redis-powered with in-memory fallback

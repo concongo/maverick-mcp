@@ -241,7 +241,7 @@ Test scenarios cover real-world usage patterns:
 ```python
 test_queries = [
     "AAPL stock financial analysis and investment outlook",
-    "Tesla market sentiment and competitive position", 
+    "Tesla market sentiment and competitive position",
     "Microsoft earnings performance and growth prospects",
     "tech sector analysis and market trends",
     "artificial intelligence investment opportunities",
@@ -346,7 +346,7 @@ python scripts/run_exa_tests.py --validate
 
 **Research Depth Performance Expectations:**
 - **Basic**: < 15 seconds execution time
-- **Standard**: 15-30 seconds execution time  
+- **Standard**: 15-30 seconds execution time
 - **Comprehensive**: 30-45 seconds execution time
 - **Exhaustive**: 45-60 seconds execution time
 
@@ -467,7 +467,7 @@ pytest -m "not slow and not external"
 # Full test suite (for main branch)
 pytest -m "not external" --maxfail=5
 
-# External API tests (nightly/weekly)  
+# External API tests (nightly/weekly)
 pytest -m external
 ```
 

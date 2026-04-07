@@ -46,25 +46,25 @@ The `DeepResearchState` extends `BaseAgentState` with comprehensive tracking:
 class DeepResearchState(BaseAgentState):
     # Research parameters
     research_query: str
-    research_scope: str  
+    research_scope: str
     research_depth: str
     timeframe: str
-    
+
     # Source management
     raw_sources: list[dict]
     processed_sources: list[dict]
     source_credibility: dict[str, float]
-    
+
     # Content analysis
     extracted_content: dict[str, str]
     key_insights: list[dict]
     sentiment_analysis: dict
-    
+
     # Research findings
     research_themes: list[dict]
     consensus_view: dict
     contrarian_views: list[dict]
-    
+
     # Persona adaptation
     persona_focus_areas: list[str]
     actionable_insights: list[dict]
@@ -232,7 +232,7 @@ print(f"Trusted domains: {research_config.trusted_domains}")
 - **Insights**: Emphasize capital preservation and low-risk opportunities
 - **Actions**: More cautious recommendations with detailed risk analysis
 
-### Moderate Investor  
+### Moderate Investor
 - **Focus**: Balanced growth and value, diversification
 - **Sources**: Mix of news, analysis, and fundamental reports
 - **Insights**: Balanced view of opportunities and risks

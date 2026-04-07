@@ -34,4 +34,3 @@ This project addresses common friction in day-to-day market analysis workflows:
 - Latency: common queries return quickly (via caching where appropriate)
 - Correctness: indicator calculations and screening rules match expectations
 - Usability: outputs are structured, scannable, and easy to act on
-

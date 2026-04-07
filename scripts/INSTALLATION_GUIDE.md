@@ -88,7 +88,7 @@ python3 scripts/load_example.py
 
 ### Files Created
 - **`load_tiingo_data.py`**: Main comprehensive data loader script
-- **`tiingo_config.py`**: Configuration settings and symbol lists  
+- **`tiingo_config.py`**: Configuration settings and symbol lists
 - **`load_example.py`**: Interactive examples and tutorials
 - **`validate_setup.py`**: Setup validation and dependency checking
 - **`test_tiingo_loader.py`**: Unit tests and validation
@@ -105,7 +105,7 @@ python3 scripts/load_example.py
 
 ### Database Tables
 - **`mcp_stocks`**: Basic stock information
-- **`mcp_price_cache`**: Historical OHLCV price data  
+- **`mcp_price_cache`**: Historical OHLCV price data
 - **`mcp_technical_cache`**: Calculated technical indicators
 - **`mcp_maverick_stocks`**: Momentum screening results
 - **`mcp_maverick_bear_stocks`**: Bear market screening results
@@ -148,7 +148,7 @@ export ENVIRONMENT=development
 - Exponential Moving Average (EMA 21)
 - Average Directional Index (ADX 14)
 
-### Momentum Indicators  
+### Momentum Indicators
 - Relative Strength Index (RSI 14)
 - MACD (12, 26, 9)
 - Stochastic Oscillator (14, 3, 3)
@@ -174,7 +174,7 @@ export ENVIRONMENT=development
 ### Maverick Momentum Screen
 **Criteria:**
 - Price > 21-day EMA
-- EMA-21 > SMA-50  
+- EMA-21 > SMA-50
 - SMA-50 > SMA-200
 - Relative Strength > 70
 - Volume > 500K daily
@@ -190,7 +190,7 @@ export ENVIRONMENT=development
 
 **Use Case:** Short candidates or stocks to avoid
 
-### Supply/Demand Breakout Screen  
+### Supply/Demand Breakout Screen
 **Criteria:**
 - Price > SMA-50 and SMA-200
 - Strong relative strength (>60)
@@ -281,7 +281,7 @@ python3 scripts/load_tiingo_data.py --resume --checkpoint-file full_load.json
 
 **Typical Loading Times (on modern hardware):**
 - 10 symbols, 1 year: 2-3 minutes
-- 100 symbols, 2 years: 15-20 minutes  
+- 100 symbols, 2 years: 15-20 minutes
 - 500 symbols, 2 years: 1-2 hours
 - 3000+ symbols, 2 years: 6-12 hours
 
@@ -323,7 +323,7 @@ with SessionLocal() as session:
 Once setup is complete, you should be able to:
 
 1. ✅ Load market data from Tiingo efficiently
-2. ✅ Calculate comprehensive technical indicators  
+2. ✅ Calculate comprehensive technical indicators
 3. ✅ Run sophisticated screening algorithms
 4. ✅ Resume interrupted loads seamlessly
 5. ✅ Access all data through Maverick-MCP APIs

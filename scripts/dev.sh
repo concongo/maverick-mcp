@@ -108,15 +108,15 @@ for i in {1..45}; do
         echo -e "${RED}Backend process died! Check output above for errors.${NC}"
         exit 1
     fi
-    
+
     # Check if port is open
     if nc -z localhost ${PORT} 2>/dev/null || curl -s http://localhost:${PORT}/health >/dev/null 2>&1; then
         if [ "$TOOLS_REGISTERED" = false ]; then
             echo -e "${GREEN}Backend port is open, checking for tool registration...${NC}"
-            
+
             # Check backend.log for tool registration messages
-            if grep -q "Research tools registered successfully" backend.log 2>/dev/null || 
-               grep -q "Tool registration process completed" backend.log 2>/dev/null || 
+            if grep -q "Research tools registered successfully" backend.log 2>/dev/null ||
+               grep -q "Tool registration process completed" backend.log 2>/dev/null ||
                grep -q "Tools registered successfully" backend.log 2>/dev/null; then
                 echo -e "${GREEN}Research tools successfully registered!${NC}"
                 TOOLS_REGISTERED=true
@@ -128,13 +128,13 @@ for i in {1..45}; do
     else
         echo -e "${YELLOW}Still waiting for backend to start... ($i/45)${NC}"
     fi
-    
+
     if [ $i -eq 45 ]; then
         echo -e "${RED}Backend failed to fully initialize after 45 seconds!${NC}"
         echo -e "${RED}Server may be running but tools not registered. Check output above.${NC}"
         # Don't exit - let it continue in case tools load later
     fi
-    
+
     sleep 1
 done
 

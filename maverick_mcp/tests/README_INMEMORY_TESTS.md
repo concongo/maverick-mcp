@@ -210,7 +210,7 @@ async def test_new_feature(test_db, mock_redis):
         result = await client.call_tool("new_tool", {
             "param": "value"
         })
-        
+
         assert result.text is not None
         data = eval(result.text)
         assert data["expected_key"] == "expected_value"

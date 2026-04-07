@@ -185,7 +185,7 @@ Identifies stocks with strong upward momentum:
 - Relative Strength Rating > 70
 - Minimum volume thresholds
 
-### Bear Market Screen  
+### Bear Market Screen
 Identifies stocks in downtrends:
 - Price below 21-day EMA
 - EMA-21 below SMA-50
@@ -269,7 +269,7 @@ python scripts/load_example.py
 
 The example script provides:
 1. Load sample stocks (5 symbols)
-2. Load sector stocks (technology)  
+2. Load sector stocks (technology)
 3. Resume interrupted load demonstration
 4. Database statistics viewer
 
@@ -318,7 +318,7 @@ If you're getting rate limited frequently:
 
 #### 4. Memory Issues
 For large loads:
-- Reduce `--batch-size` 
+- Reduce `--batch-size`
 - Reduce `--max-concurrent`
 - Monitor memory usage with `htop`
 
@@ -346,7 +346,7 @@ The loaded data integrates seamlessly with Maverick-MCP:
 ### API Endpoints
 The data is immediately available through Maverick-MCP's API endpoints:
 - `/api/v1/stocks` - Stock information
-- `/api/v1/prices/{symbol}` - Price data  
+- `/api/v1/prices/{symbol}` - Price data
 - `/api/v1/technical/{symbol}` - Technical indicators
 - `/api/v1/screening/maverick` - Maverick stock screen results
 
@@ -387,7 +387,7 @@ Set up daily data updates with cron:
 # Daily update at 6 PM EST (after market close)
 0 18 * * 1-5 cd /path/to/maverick-mcp && python scripts/load_tiingo_data.py --sp500 --years 0.1 --run-screening >> /var/log/tiingo_updates.log 2>&1
 
-# Weekly full reload on weekends  
+# Weekly full reload on weekends
 0 2 * * 6 cd /path/to/maverick-mcp && python scripts/load_tiingo_data.py --sp500 --years 2 --calculate-indicators --run-screening >> /var/log/tiingo_weekly.log 2>&1
 ```
 

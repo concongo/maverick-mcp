@@ -49,4 +49,3 @@ Incorrect data is worse than no data.
 - Outputs should be scannable (headings, bullet points, tables)
 - Prefer “what to do next” suggestions on errors (missing API keys, etc.)
 - Avoid unnecessary verbosity; offer drill-down when requested
-

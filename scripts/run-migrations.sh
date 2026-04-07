@@ -54,15 +54,15 @@ usage() {
 # Function to check database connection
 check_database() {
     echo -e "${YELLOW}Checking database connection...${NC}"
-    
+
     if [ -z "$DATABASE_URL" ]; then
         echo -e "${RED}Error: DATABASE_URL not set${NC}"
         exit 1
     fi
-    
+
     # Extract database name from URL
     DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-    
+
     # Test connection with Python
     uv run python -c "
 import sys
@@ -76,7 +76,7 @@ except Exception as e:
     print(f'Database connection failed: {e}')
     sys.exit(1)
 " || exit 1
-    
+
     echo -e "${GREEN}✓ Connected to database: $DB_NAME${NC}"
 }
 
@@ -86,12 +86,12 @@ validate_alembic() {
         echo -e "${RED}Error: alembic.ini not found${NC}"
         exit 1
     fi
-    
+
     if [ ! -d alembic/versions ]; then
         echo -e "${RED}Error: alembic/versions directory not found${NC}"
         exit 1
     fi
-    
+
     echo -e "${GREEN}✓ Alembic configuration validated${NC}"
 }
 
@@ -99,15 +99,15 @@ validate_alembic() {
 show_status() {
     echo -e "${BLUE}Current Migration Status${NC}"
     echo "========================"
-    
+
     # Show current revision
     echo -e "\n${YELLOW}Current database revision:${NC}"
     alembic current 2>/dev/null || echo "No migrations applied"
-    
+
     # Show pending migrations
     echo -e "\n${YELLOW}Pending migrations:${NC}"
     alembic heads 2>/dev/null || echo "No pending migrations"
-    
+
     # Count migration files
     MIGRATION_COUNT=$(find alembic/versions -name "*.py" | grep -v __pycache__ | wc -l)
     echo -e "\n${YELLOW}Total migration files:${NC} $MIGRATION_COUNT"
@@ -124,14 +124,14 @@ show_history() {
 validate_migrations() {
     echo -e "${BLUE}Validating Migrations${NC}"
     echo "===================="
-    
+
     # Check for duplicate revisions
     echo -e "${YELLOW}Checking for duplicate revisions...${NC}"
-    DUPLICATES=$(find alembic/versions -name "*.py" -exec grep -H "^revision = " {} \; | 
-                 grep -v __pycache__ | 
-                 awk -F: '{print $2}' | 
+    DUPLICATES=$(find alembic/versions -name "*.py" -exec grep -H "^revision = " {} \; |
+                 grep -v __pycache__ |
+                 awk -F: '{print $2}' |
                  sort | uniq -d)
-    
+
     if [ -n "$DUPLICATES" ]; then
         echo -e "${RED}Error: Duplicate revisions found:${NC}"
         echo "$DUPLICATES"
@@ -139,7 +139,7 @@ validate_migrations() {
     else
         echo -e "${GREEN}✓ No duplicate revisions${NC}"
     fi
-    
+
     # Check for broken dependencies
     echo -e "${YELLOW}Checking migration dependencies...${NC}"
     uv run python -c "
@@ -160,16 +160,16 @@ except Exception as e:
 create_backup() {
     echo -e "${BLUE}Creating Database Backup${NC}"
     echo "======================"
-    
+
     # Extract connection details from DATABASE_URL
     DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
     DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-    
+
     BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql"
     mkdir -p backups
-    
+
     echo -e "${YELLOW}Creating backup: $BACKUP_FILE${NC}"
-    
+
     # Use pg_dump if PostgreSQL
     if [[ $DATABASE_URL == *"postgresql"* ]]; then
         pg_dump $DATABASE_URL > $BACKUP_FILE
@@ -177,7 +177,7 @@ create_backup() {
         echo -e "${RED}Backup not implemented for this database type${NC}"
         exit 1
     fi
-    
+
     if [ -f $BACKUP_FILE ]; then
         SIZE=$(du -h $BACKUP_FILE | cut -f1)
         echo -e "${GREEN}✓ Backup created: $BACKUP_FILE ($SIZE)${NC}"
@@ -191,28 +191,28 @@ create_backup() {
 apply_migrations() {
     local DRY_RUN=$1
     local FORCE=$2
-    
+
     echo -e "${BLUE}Applying Migrations${NC}"
     echo "=================="
-    
+
     # Show pending migrations
     echo -e "${YELLOW}Checking for pending migrations...${NC}"
     PENDING=$(alembic upgrade head --sql 2>/dev/null | grep -c "UPDATE alembic_version" || echo "0")
-    
+
     if [ "$PENDING" -eq "0" ]; then
         echo -e "${GREEN}✓ Database is up to date${NC}"
         return 0
     fi
-    
+
     echo -e "${YELLOW}Found pending migrations${NC}"
-    
+
     # Dry run mode
     if [ "$DRY_RUN" == "true" ]; then
         echo -e "\n${YELLOW}SQL to be executed:${NC}"
         alembic upgrade head --sql
         return 0
     fi
-    
+
     # Confirmation prompt
     if [ "$FORCE" != "true" ]; then
         echo -e "\n${YELLOW}Do you want to apply these migrations? (y/N)${NC}"
@@ -222,13 +222,13 @@ apply_migrations() {
             exit 0
         fi
     fi
-    
+
     # Apply migrations
     echo -e "\n${YELLOW}Applying migrations...${NC}"
     alembic upgrade head
-    
+
     echo -e "${GREEN}✓ Migrations applied successfully${NC}"
-    
+
     # Show new status
     echo -e "\n${YELLOW}New database revision:${NC}"
     alembic current
@@ -239,27 +239,27 @@ downgrade_migration() {
     local REVISION=$1
     local DRY_RUN=$2
     local FORCE=$3
-    
+
     echo -e "${BLUE}Downgrading Migration${NC}"
     echo "==================="
-    
+
     if [ -z "$REVISION" ]; then
         echo -e "${RED}Error: Revision required for downgrade${NC}"
         usage
         exit 1
     fi
-    
+
     # Show current revision
     echo -e "${YELLOW}Current revision:${NC}"
     alembic current
-    
+
     # Dry run mode
     if [ "$DRY_RUN" == "true" ]; then
         echo -e "\n${YELLOW}SQL to be executed:${NC}"
         alembic downgrade $REVISION --sql
         return 0
     fi
-    
+
     # Confirmation prompt
     if [ "$FORCE" != "true" ]; then
         echo -e "\n${RED}WARNING: This will downgrade the database to revision $REVISION${NC}"
@@ -270,16 +270,16 @@ downgrade_migration() {
             exit 0
         fi
     fi
-    
+
     # Create backup first
     create_backup
-    
+
     # Apply downgrade
     echo -e "\n${YELLOW}Downgrading to revision $REVISION...${NC}"
     alembic downgrade $REVISION
-    
+
     echo -e "${GREEN}✓ Downgrade completed successfully${NC}"
-    
+
     # Show new status
     echo -e "\n${YELLOW}New database revision:${NC}"
     alembic current

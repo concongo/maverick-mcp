@@ -95,7 +95,7 @@ MaverickMCP provides comprehensive financial analysis capabilities:
 - Real-time quotes and market data
 - Company information and fundamentals
 
-### Technical Analysis Tools  
+### Technical Analysis Tools
 - 20+ technical indicators (RSI, MACD, Bollinger Bands, etc.)
 - Support and resistance level identification
 - Trend analysis and pattern recognition

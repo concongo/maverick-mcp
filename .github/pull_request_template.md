@@ -29,7 +29,7 @@ A concise description of what this PR accomplishes.
 **Primary areas affected:**
 - [ ] Data fetching (Tiingo, Yahoo Finance, FRED)
 - [ ] Technical analysis calculations
-- [ ] Stock screening strategies  
+- [ ] Stock screening strategies
 - [ ] Portfolio analysis and optimization
 - [ ] MCP server/tools implementation
 - [ ] Database operations and models
@@ -60,7 +60,7 @@ Describe the technical approach and any architectural decisions.
 
 **Testing performed:**
 - [ ] Unit tests added/updated
-- [ ] Integration tests added/updated  
+- [ ] Integration tests added/updated
 - [ ] Manual testing completed
 - [ ] Tested with Claude Desktop
 - [ ] Tested with different data sources

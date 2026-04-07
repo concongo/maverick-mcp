@@ -592,14 +592,14 @@ class TestWorkflowValidation:
             assert field in metadata, f"Missing metadata field: {field}"
 
         # Validate data types
-        assert isinstance(metadata["total_execution_time_ms"], (int, float))
+        assert isinstance(metadata["total_execution_time_ms"], int | float)
         assert isinstance(metadata["workflow_completed"], bool)
 
         if "recommendation" in result:
             recommendation = result["recommendation"]
             assert "recommended_strategy" in recommendation
             assert "recommendation_confidence" in recommendation
-            assert isinstance(recommendation["recommendation_confidence"], (int, float))
+            assert isinstance(recommendation["recommendation_confidence"], int | float)
             assert 0.0 <= recommendation["recommendation_confidence"] <= 1.0
 
     async def test_data_consistency(self, workflow_with_real_agents, db_session):
@@ -620,7 +620,7 @@ class TestWorkflowValidation:
                 market_analysis = result["market_analysis"]
                 assert "regime" in market_analysis
                 assert isinstance(
-                    market_analysis.get("regime_confidence", 0), (int, float)
+                    market_analysis.get("regime_confidence", 0), int | float
                 )
 
             # Strategy selection should be consistent

@@ -307,15 +307,15 @@ The migration creates optimized indexes for common queries:
 
 ```sql
 -- Price data lookups
-CREATE INDEX mcp_price_cache_stock_id_date_idx 
+CREATE INDEX mcp_price_cache_stock_id_date_idx
 ON mcp_price_cache(stock_id, date);
 
 -- Screening queries
-CREATE INDEX mcp_maverick_stocks_combined_score_idx 
+CREATE INDEX mcp_maverick_stocks_combined_score_idx
 ON mcp_maverick_stocks(combined_score DESC);
 
 -- Supply/demand filtering
-CREATE INDEX mcp_supply_demand_breakouts_ma_filter_idx 
+CREATE INDEX mcp_supply_demand_breakouts_ma_filter_idx
 ON mcp_supply_demand_breakouts(close_price, sma_50, sma_150, sma_200);
 ```
 
@@ -388,9 +388,9 @@ from maverick_mcp.data.models import Stock, PriceCache, get_db
 # Get historical data
 with get_db() as session:
     df = PriceCache.get_price_data(
-        session, 
-        "AAPL", 
-        "2023-01-01", 
+        session,
+        "AAPL",
+        "2023-01-01",
         "2024-01-01"
     )
 ```

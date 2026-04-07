@@ -78,7 +78,7 @@ MaverickMCP is a personal stock analysis MCP server built for Claude Desktop. It
    ```
    # OpenRouter API (strongly recommended for research - access to 400+ AI models with intelligent cost optimization)
    OPENROUTER_API_KEY=your-openrouter-key
-   
+
    # Web Search API (recommended for research features)
    EXA_API_KEY=your-exa-key
 
