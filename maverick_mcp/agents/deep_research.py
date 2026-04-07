@@ -1297,6 +1297,18 @@ class DeepResearchAgent(PersonaAwareAgent):
             else:
                 logger.info("Pre-initialized Exa search provider")
 
+            # Perplexity Sonar — isolated extension (maverick_mcp/agents/perplexity_provider.py)
+            perplexity_key = settings.research.get_perplexity_api_key()
+            if perplexity_key:
+                try:
+                    from maverick_mcp.agents.perplexity_provider import (  # noqa: PLC0415
+                        PerplexitySearchProvider,
+                    )
+                    self.search_providers.append(PerplexitySearchProvider(perplexity_key))
+                    logger.info("Initialized Perplexity search provider")
+                except Exception as _perplexity_exc:
+                    logger.warning(f"Failed to initialize Perplexity provider: {_perplexity_exc}")
+
         except Exception as e:
             logger.error(f"Failed to pre-initialize Exa search provider: {e}")
             self.search_providers = []

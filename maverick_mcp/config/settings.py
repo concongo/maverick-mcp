@@ -176,6 +176,22 @@ class ResearchSettings(BaseModel):
         """Get the Exa API key as a plain string for API client usage."""
         return self.exa_api_key.get_secret_value() if self.exa_api_key else None
 
+    # Perplexity Sonar (isolated extension — see maverick_mcp/agents/perplexity_provider.py)
+    perplexity_api_key: SecretStr | None = Field(
+        default_factory=lambda: (
+            SecretStr(v) if (v := os.getenv("PERPLEXITY_API_KEY")) else None
+        ),
+        description="Perplexity API key for Sonar web search",
+    )
+
+    def get_perplexity_api_key(self) -> str | None:
+        """Get the Perplexity API key as a plain string for API client usage."""
+        return (
+            self.perplexity_api_key.get_secret_value()
+            if self.perplexity_api_key
+            else None
+        )
+
     # Research parameters
     default_max_sources: int = Field(
         default=50, description="Default max sources per research"
@@ -223,7 +239,10 @@ class ResearchSettings(BaseModel):
     @property
     def api_keys(self) -> dict[str, str | None]:
         """Get API keys as dictionary (plain strings for API client usage)."""
-        return {"exa_api_key": self.get_exa_api_key()}
+        return {
+            "exa_api_key": self.get_exa_api_key(),
+            "perplexity_api_key": self.get_perplexity_api_key(),
+        }
 
 
 class VectorStoreSettings(BaseModel):
