@@ -563,27 +563,47 @@ async def comprehensive_research(
             "provider_validation", "Validating search provider configuration"
         )
 
-        # Check for API key before creating agent (faster failure)
+        # Check for at least one configured search provider before creating agent.
         exa_available = bool(settings.research.exa_api_key)
+        perplexity_available = bool(settings.research.perplexity_api_key)
 
-        if not exa_available:
+        if not exa_available and not perplexity_available:
             return {
                 "success": False,
-                "error": "Research functionality unavailable - Exa search provider not configured",
+                "error": "Research functionality unavailable - no search provider configured",
                 "details": {
-                    "required_configuration": "Exa search provider API key is required",
-                    "exa_api_key": "Missing (configure EXA_API_KEY environment variable)",
-                    "setup_instructions": "Get a free API key from: Exa (exa.ai)",
+                    "required_configuration": "Configure EXA_API_KEY or PERPLEXITY_API_KEY",
+                    "exa_api_key": (
+                        "Configured"
+                        if exa_available
+                        else "Missing (configure EXA_API_KEY)"
+                    ),
+                    "perplexity_api_key": (
+                        "Configured"
+                        if perplexity_available
+                        else "Missing (configure PERPLEXITY_API_KEY)"
+                    ),
+                    "setup_instructions": (
+                        "Get a key from Exa (exa.ai) or Perplexity (perplexity.ai)"
+                    ),
                 },
                 "query": query,
                 "request_id": request_id,
                 "timestamp": datetime.now().isoformat(),
             }
 
-        # Log available provider
+        # Log available providers
         tool_logger.step(
             "provider_available",
-            "Exa search provider available",
+            "Available providers: "
+            + ", ".join(
+                provider_name
+                for provider_name, available in (
+                    ("Exa", exa_available),
+                    ("Perplexity", perplexity_available),
+                )
+                if available
+            ),
         )
 
         session_id = f"enhanced_research_{datetime.now().timestamp()}"

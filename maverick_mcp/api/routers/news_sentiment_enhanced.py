@@ -149,7 +149,18 @@ async def get_news_sentiment_enhanced(
                 else:
                     tool_logger.step("tiingo_error", f"Tiingo error: {str(e)}")
 
-        # Step 2: Fallback to research-based sentiment
+        # Step 2: Try a lightweight Perplexity fallback before the heavier research path.
+        perplexity_result = await _get_perplexity_news_sentiment(
+            ticker=ticker,
+            timeframe=timeframe,
+            limit=limit,
+            request_id=request_id,
+            tool_logger=tool_logger,
+        )
+        if perplexity_result is not None:
+            return perplexity_result
+
+        # Step 3: Fallback to research-based sentiment
         tool_logger.step("research_fallback", "Using research-based sentiment analysis")
 
         from maverick_mcp.api.routers.research import analyze_market_sentiment
@@ -183,7 +194,7 @@ async def get_news_sentiment_enhanced(
                 "message": "Using research-based sentiment (Tiingo news unavailable on free tier)",
             }
 
-        # Step 3: Basic fallback
+        # Step 4: Basic fallback
         return _provide_basic_sentiment_fallback(ticker, request_id)
 
     except Exception as e:
@@ -276,6 +287,77 @@ Response format:
     except Exception as e:
         tool_logger.step("llm_error", f"LLM analysis failed: {e}")
         return _basic_news_analysis(news_articles)
+
+
+async def _get_perplexity_news_sentiment(
+    ticker: str,
+    timeframe: str,
+    limit: int,
+    request_id: str,
+    tool_logger,
+) -> dict[str, Any] | None:
+    """Try a lightweight Perplexity search fallback for news sentiment."""
+
+    perplexity_api_key = settings.research.get_perplexity_api_key()
+    if not perplexity_api_key:
+        tool_logger.step(
+            "perplexity_unavailable",
+            "Perplexity API key not configured, skipping lightweight fallback",
+        )
+        return None
+
+    try:
+        from maverick_mcp.agents.perplexity_provider import PerplexitySearchProvider
+
+        tool_logger.step(
+            "perplexity_fallback",
+            f"Using Perplexity fallback search for {ticker}",
+        )
+
+        provider = PerplexitySearchProvider(perplexity_api_key)
+        query = f"{ticker} stock news sentiment recent {timeframe}"
+        results = await asyncio.wait_for(
+            provider.search(query=query, num_results=limit, timeout_budget=8.0),
+            timeout=8.0,
+        )
+
+        if not results:
+            tool_logger.step(
+                "perplexity_no_results",
+                f"Perplexity returned no news-like results for {ticker}",
+            )
+            return None
+
+        sentiment_result = _basic_news_analysis(results)
+        headlines = [item.get("title", "") for item in results[:3]]
+        themes = sentiment_result.get("themes", [])
+
+        return {
+            "ticker": ticker,
+            "sentiment": sentiment_result["overall_sentiment"],
+            "confidence": sentiment_result["confidence"],
+            "source": "perplexity_search_fallback",
+            "status": "fallback_success",
+            "analysis": {
+                "articles_analyzed": len(results),
+                "sentiment_breakdown": sentiment_result["breakdown"],
+                "key_themes": themes,
+                "recent_headlines": headlines,
+            },
+            "timeframe": timeframe,
+            "request_id": request_id,
+            "timestamp": datetime.now().isoformat(),
+            "message": "Using Perplexity search fallback (Tiingo news unavailable)",
+        }
+    except TimeoutError:
+        tool_logger.step(
+            "perplexity_timeout",
+            f"Perplexity fallback timed out for {ticker}",
+        )
+        return None
+    except Exception as exc:
+        tool_logger.step("perplexity_error", f"Perplexity fallback error: {exc}")
+        return None
 
 
 def _basic_news_analysis(news_articles: list) -> dict[str, Any]:
