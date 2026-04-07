@@ -8,7 +8,7 @@ for production monitoring and alerting.
 import os
 import time
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, Literal
 
 from maverick_mcp.config.settings import settings
 from maverick_mcp.utils.logging import get_logger
@@ -25,27 +25,28 @@ except ImportError:
 
     # Create stub classes for when prometheus is not available
     class _MetricStub:
-        def __init__(self, *args, **kwargs):
-            pass
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            del args, kwargs
 
-        def inc(self, *args, **kwargs):
-            pass
+        def inc(self, *args: Any, **kwargs: Any) -> None:
+            del args, kwargs
 
-        def observe(self, *args, **kwargs):
-            pass
+        def observe(self, *args: Any, **kwargs: Any) -> None:
+            del args, kwargs
 
-        def set(self, *args, **kwargs):
-            pass
+        def set(self, *args: Any, **kwargs: Any) -> None:
+            del args, kwargs
 
-        def dec(self, *args, **kwargs):
-            pass
+        def dec(self, *args: Any, **kwargs: Any) -> None:
+            del args, kwargs
 
-        def labels(self, *args, **kwargs):
+        def labels(self, *args: Any, **kwargs: Any) -> "_MetricStub":
+            del args, kwargs
             return self
 
     Counter = Gauge = Histogram = _MetricStub
 
-    def generate_latest():
+    def generate_latest() -> bytes:
         return b"# Prometheus not available"
 
 
@@ -340,7 +341,7 @@ class MonitoringService:
                     ),
                     SqlalchemyIntegration(),
                 ],
-                before_send=self._before_send_sentry,
+                before_send=self._before_send_sentry,  # type: ignore[arg-type]
                 attach_stacktrace=True,
                 send_default_pii=False,  # Don't send PII
                 release=os.getenv("RELEASE_VERSION", "unknown"),
@@ -352,7 +353,6 @@ class MonitoringService:
                 {
                     "name": settings.app_name,
                     "environment": settings.environment,
-                    "auth_enabled": settings.auth.enabled,
                 },
             )
 
@@ -419,7 +419,14 @@ class MonitoringService:
         except Exception as e:
             logger.error(f"Failed to capture exception with Sentry: {e}")
 
-    def capture_message(self, message: str, level: str = "info", **context):
+    def capture_message(
+        self,
+        message: str,
+        level: Literal[
+            "fatal", "critical", "error", "warning", "info", "debug"
+        ] = "info",
+        **context,
+    ):
         """Capture message with Sentry."""
         if not self.sentry_enabled:
             return
@@ -564,7 +571,6 @@ def track_tool_error(tool_name: str, error_type: str, complexity: str = "standar
 
 def track_cache_operation(
     cache_type: str = "default",
-    operation: str = "get",
     hit: bool = False,
     key_prefix: str = "unknown",
 ):
